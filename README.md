@@ -1,6 +1,6 @@
-  SimpleTrains - Minecraft Plugin
+  # SimpleTrains - Minecraft Plugin
 
-  Version: 1.0.0 | API: 1.21 | Author: AndresTube
+  Actual Version: 1.0.0 | API: 1.21 | Author: AndresTube
 
   Description
 
