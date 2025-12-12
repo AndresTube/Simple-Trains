@@ -209,7 +209,13 @@ public class GuiListener implements Listener {
             return;
         }
 
-        if (itemName.equals("Edit Welcome Message")) {
+        // Compare with stripped message keys for language support
+        String editMessageText = ChatColor.stripColor(msg().get("gui-item-edit-message"));
+        String linkManagerText = ChatColor.stripColor(msg().get("gui-item-link-manager"));
+        String deleteStationText = ChatColor.stripColor(msg().get("gui-item-delete-station"));
+        String backMainText = ChatColor.stripColor(msg().get("gui-item-back-main"));
+
+        if (itemName.equals(editMessageText)) {
             if (plugin.getMessageInputHandler().isWaitingForInput(p.getUniqueId())) {
                 p.sendMessage(msg().getWithPrefix("gui-already-setting-message"));
                 p.closeInventory();
@@ -223,14 +229,14 @@ public class GuiListener implements Listener {
             p.closeInventory();
             return;
 
-        } else if (itemName.equals("Link Manager")) {
+        } else if (itemName.equals(linkManagerText)) {
             p.openInventory(LinkManagerGui.create(manager, stationName));
             return;
 
-        } else if (itemName.equals("DELETE STATION")) {
+        } else if (itemName.equals(deleteStationText)) {
             p.sendMessage(msg().get("gui-delete-confirm", "STATION", stationName));
             p.closeInventory();
-        } else if (itemName.equals("Back to Main List")) {
+        } else if (itemName.equals(backMainText)) {
             p.openInventory(MainGui.create(manager, p));
         }
     }
@@ -243,12 +249,17 @@ public class GuiListener implements Listener {
         String stationName = ChatColor.stripColor(inventoryTitle.replace(LinkManagerGui.GUI_NAME + ChatColor.RESET + " - ", ""));
         String itemName = ChatColor.stripColor(meta.getDisplayName());
 
-        if (itemName.equals("Back to Configuration")) {
+        // Compare with stripped message keys for language support
+        String backConfigText = ChatColor.stripColor(msg().get("gui-item-back-config"));
+        String requestLinkText = ChatColor.stripColor(msg().get("gui-item-request-new-link"));
+        String viewPendingText = ChatColor.stripColor(msg().get("gui-item-view-pending"));
+
+        if (itemName.equals(backConfigText)) {
             p.openInventory(configGui.create(stationName));
             return;
         }
 
-        if (itemName.equals("Request New Link")) {
+        if (itemName.equals(requestLinkText)) {
             p.sendMessage(msg().getWithPrefix("gui-enter-link-station"));
             p.sendMessage(msg().getWithPrefix("gui-link-request-hint"));
 
@@ -257,7 +268,7 @@ public class GuiListener implements Listener {
             return;
         }
 
-        if (itemName.equals("View Pending Requests")) {
+        if (itemName.equals(viewPendingText)) {
             p.openInventory(PendingRequestsGui.create(plugin, manager, stationName));
             return;
         }
@@ -281,14 +292,40 @@ public class GuiListener implements Listener {
         String receivingStation = ChatColor.stripColor(inventoryTitle.replace(PendingRequestsGui.GUI_NAME + ChatColor.RESET + " - ", ""));
         String itemName = ChatColor.stripColor(meta.getDisplayName());
 
-        if (itemName.equals("Back to Link Manager")) {
+        // Compare with stripped message keys for language support
+        String backLinkManagerText = ChatColor.stripColor(msg().get("gui-item-back-link-manager"));
+
+        if (itemName.equals(backLinkManagerText)) {
             p.openInventory(LinkManagerGui.create(manager, receivingStation));
             return;
         }
 
         if (clickedItem.getType() == Material.BOOK) {
+            // Extract station name from the item - stored in lore instead of display name
+            List<String> lore = meta.getLore();
+            if (lore == null || lore.isEmpty()) return;
 
-            String initiatingStation = ChatColor.stripColor(itemName.replace("Request from ", ""));
+            // Find the station name from lore (gui-lore-station format)
+            String initiatingStation = null;
+            for (String line : lore) {
+                String strippedLine = ChatColor.stripColor(line);
+                // The station name is stored in lore, extract it
+                if (strippedLine.startsWith("Station: ") || strippedLine.contains("Estación: ")) {
+                    initiatingStation = strippedLine.replaceAll(".*: ", "");
+                    break;
+                }
+            }
+
+            // Fallback: try to get from manager directly
+            if (initiatingStation == null) {
+                initiatingStation = manager.getPendingInitiatingStation(receivingStation);
+            }
+
+            if (initiatingStation == null) {
+                p.sendMessage(msg().getWithPrefix("gui-request-expired"));
+                p.openInventory(PendingRequestsGui.create(plugin, manager, receivingStation));
+                return;
+            }
             String initiatingStationFromManager = manager.getPendingInitiatingStation(receivingStation);
 
             if (initiatingStationFromManager == null || !initiatingStationFromManager.equals(initiatingStation)) {

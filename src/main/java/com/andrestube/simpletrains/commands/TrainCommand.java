@@ -87,6 +87,9 @@ public class TrainCommand implements CommandExecutor {
             case "gui":
                 p.openInventory(MainGui.create(manager, p));
                 break;
+            case "reload":
+                handleReload(p);
+                break;
             case "help":
                 sendHelpMessage(p);
                 break;
@@ -109,9 +112,10 @@ public class TrainCommand implements CommandExecutor {
             return;
         }
 
-        int cost = plugin.getConfig().getInt("settings.creation_xp_cost", 5);
-        if (p.getLevel() < cost) {
-            p.sendMessage(msg().getWithPrefix("not-enough-xp-create", "COST", String.valueOf(cost), "CURRENT", String.valueOf(p.getLevel())));
+        // Check creation cost
+        var creationCostManager = plugin.getCreationCostManager();
+        if (creationCostManager.isEnabled() && !creationCostManager.canAfford(p)) {
+            creationCostManager.sendNotEnoughMessage(p);
             return;
         }
 
@@ -125,9 +129,12 @@ public class TrainCommand implements CommandExecutor {
         }
 
         if (railBlock.getType().name().contains("RAIL") && baseBlock.getType() == requiredBlock) {
-            p.setLevel(p.getLevel() - cost);
+            // Charge creation cost
+            if (creationCostManager.isEnabled()) {
+                creationCostManager.charge(p);
+            }
             manager.addStation(name, railBlock.getLocation(), p.getUniqueId());
-            p.sendMessage(msg().getWithPrefix("station-created", "STATION", name, "COST", String.valueOf(cost)));
+            p.sendMessage(msg().getWithPrefix("station-created", "STATION", name, "COST", creationCostManager.getCostDisplay()));
         } else {
             p.sendMessage(msg().getWithPrefix("wrong-block-position", "BLOCK", requiredBlock.name()));
         }
@@ -411,10 +418,34 @@ public class TrainCommand implements CommandExecutor {
         p.sendMessage(msg().getWithPrefix("message-updated", "STATION", name, "MESSAGE", ChatColor.translateAlternateColorCodes('&', message)));
     }
 
+    private void handleReload(Player p) {
+        if (!p.hasPermission(ADMIN_PERM)) {
+            p.sendMessage(msg().getWithPrefix("no-permission"));
+            return;
+        }
+
+        // Reload config
+        plugin.reloadConfig();
+
+        // Reload messages
+        SimpleTrains.getMessages().reload();
+
+        // Reload sound manager
+        plugin.getSoundManager().loadConfig();
+
+        // Reload travel cost manager
+        plugin.getTravelCostManager().loadConfig();
+
+        // Reload creation cost manager
+        plugin.getCreationCostManager().loadConfig();
+
+        p.sendMessage(msg().getWithPrefix("config-reloaded"));
+    }
+
     private void sendHelpMessage(Player p) {
-        int xpCost = plugin.getConfig().getInt("settings.creation_xp_cost", 5);
+        String creationCost = plugin.getCreationCostManager().getCostDisplay();
         p.sendMessage(msg().get("help-header"));
-        p.sendMessage(msg().get("help-set", "COST", String.valueOf(xpCost)));
+        p.sendMessage(msg().get("help-set", "COST", creationCost));
         p.sendMessage(msg().get("help-delete"));
         p.sendMessage(msg().get("help-link"));
         p.sendMessage(msg().get("help-transfer"));
@@ -423,5 +454,8 @@ public class TrainCommand implements CommandExecutor {
         p.sendMessage(msg().get("help-accept-reject"));
         p.sendMessage(msg().get("help-message"));
         p.sendMessage(msg().get("help-block"));
+        if (p.hasPermission(ADMIN_PERM)) {
+            p.sendMessage(msg().get("help-reload"));
+        }
     }
 }

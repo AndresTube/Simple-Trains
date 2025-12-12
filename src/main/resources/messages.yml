@@ -421,3 +421,60 @@ help-gui: "&e/train gui &7-> Opens the station list GUI."
 help-accept-reject: "&e/train accept/reject <A> <B> &7-> Accept/Reject a link request."
 help-message: "&e/train message <st> <&msg> &7-> Sets station welcome message."
 help-block: "&e/train block <mat> &7-> (Admin) Sets creation block."
+help-reload: "&e/train reload &7-> (Admin) Reloads configuration."
+
+# ============================================
+# TRAVEL COST MESSAGES (NEW in 1.3.0)
+# ============================================
+
+# Not enough XP to travel
+# Placeholders: %COST%, %CURRENT%
+travel-not-enough-xp: "&cYou need %COST% XP levels to travel. You currently have %CURRENT%."
+
+# Not enough money to travel (Vault)
+# Placeholders: %COST%, %CURRENT%
+travel-not-enough-money: "&cYou need $%COST% to travel. You currently have $%CURRENT%."
+
+# Not enough items to travel
+# Placeholders: %AMOUNT%, %ITEM%
+travel-not-enough-items: "&cYou need %AMOUNT%x %ITEM% to travel."
+
+# Travel cost deducted (XP)
+# Placeholders: %COST%
+travel-cost-xp: "&7(-%COST% XP levels)"
+
+# Travel cost deducted (Vault)
+# Placeholders: %COST%
+travel-cost-money: "&7(-$%COST%)"
+
+# Travel cost deducted (Item)
+# Placeholders: %AMOUNT%, %ITEM%
+travel-cost-item: "&7(-%AMOUNT%x %ITEM%)"
+
+# Vault not found error
+vault-not-found: "&cEconomy plugin not found! Travel cost disabled."
+
+# Admin bypass travel cost
+travel-cost-bypass: "&7(Cost bypassed - Admin)"
+
+# ============================================
+# CREATION COST MESSAGES (NEW in 1.3.0)
+# ============================================
+
+# Not enough XP to create station
+# Placeholders: %COST%, %CURRENT%
+creation-not-enough-xp: "&cYou need %COST% XP levels to create a station. You currently have %CURRENT%."
+
+# Not enough money to create station (Vault)
+# Placeholders: %COST%, %CURRENT%
+creation-not-enough-money: "&cYou need $%COST% to create a station. You currently have $%CURRENT%."
+
+# Not enough items to create station
+# Placeholders: %AMOUNT%, %ITEM%
+creation-not-enough-items: "&cYou need %AMOUNT%x %ITEM% to create a station."
+
+# Admin bypass creation cost
+creation-cost-bypass: "&7(Cost bypassed - Admin)"
+
+# Config reloaded message
+config-reloaded: "&aConfiguration reloaded successfully!"

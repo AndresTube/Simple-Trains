@@ -2,9 +2,78 @@ settings:
   # The material required to be placed under a rail when using /train set to create a station.
   # Must be a valid Bukkit/Spigot Material name (e.g., GOLD_BLOCK, DIAMOND_BLOCK).
   creation_block: GOLD_BLOCK
-  
-  # The amount of XP levels a player must spend to create a new station using /train set.
-  creation_xp_cost: 5
+
+# ============================================
+# STATION CREATION COST (Configurable in 1.3.0)
+# ============================================
+# Cost to create a new station with /train set
+creation_cost:
+  enabled: true
+  type: XP                        # XP, VAULT, or ITEM
+  amount: 5                       # Amount to charge
+  item:
+    material: GOLD_INGOT
+    amount: 1
+    name: ""
+
+# ============================================
+# LINK COSTS
+# ============================================
+# XP cost to request a link between stations
+link_creation_xp_cost: 3
+
+# XP cost to accept a link request
+link_acceptance_xp_cost: 2
+
+# Whether linking requires the other station owner to accept
+linking_requires_owner_acceptance: true
+
+# ============================================
+# SOUNDS CONFIGURATION (NEW in 1.3.0)
+# ============================================
+# Configure sounds played during train travel.
+# Set 'enabled' to false to disable all sounds.
+# Sound names must be valid Bukkit Sound enum values.
+# See: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
+sounds:
+  enabled: true
+
+  # Sound played when departing from a station
+  departure:
+    sound: ENTITY_ENDERMAN_TELEPORT
+    volume: 1.0
+    pitch: 1.0
+
+  # Sound played when arriving at a destination
+  arrival:
+    sound: BLOCK_NOTE_BLOCK_CHIME
+    volume: 1.0
+    pitch: 1.2
+
+# ============================================
+# TRAVEL COST CONFIGURATION (NEW in 1.3.0)
+# ============================================
+# Configure travel costs for using train stations.
+# Players must pay the cost each time they travel.
+# Set 'enabled' to false to disable travel costs.
+travel_cost:
+  enabled: false
+
+  # Cost type: XP, VAULT, or ITEM
+  # XP = experience levels
+  # VAULT = economy money (requires Vault plugin)
+  # ITEM = specific item from inventory
+  type: XP
+
+  # Amount to charge (for XP and VAULT types)
+  amount: 1
+
+  # Item configuration (only used when type is ITEM)
+  item:
+    material: GOLD_INGOT
+    amount: 1
+    # Optional: custom name the item must have (leave empty for any)
+    name: ""
 
 messages:
   # The message sent to the player when a warp is confirmed and the minecart is teleported.

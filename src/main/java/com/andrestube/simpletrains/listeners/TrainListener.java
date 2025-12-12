@@ -3,8 +3,10 @@ package com.andrestube.simpletrains.listeners;
 import com.andrestube.simpletrains.SimpleTrains;
 import com.andrestube.simpletrains.gui.DestinationGui;
 import com.andrestube.simpletrains.utils.Messages;
+import com.andrestube.simpletrains.utils.SoundManager;
 import com.andrestube.simpletrains.utils.StationManager;
 import com.andrestube.simpletrains.utils.StationManager.LinkType;
+import com.andrestube.simpletrains.utils.TravelCostManager;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -142,12 +144,29 @@ public class TrainListener implements Listener {
     public static void teleportMinecart(Minecart minecart, Player player, String destinationName) {
         SimpleTrains plugin = SimpleTrains.getInstance();
         StationManager manager = plugin.getStationManager();
+        TravelCostManager costManager = plugin.getTravelCostManager();
+        SoundManager soundManager = plugin.getSoundManager();
         Location destLoc = manager.getStationLocation(destinationName);
 
         if (destLoc == null) {
             player.sendMessage(msg().getWithPrefix("destination-not-found"));
             return;
         }
+
+        // Check and charge travel cost
+        if (costManager.isEnabled()) {
+            if (!costManager.canAfford(player)) {
+                costManager.sendNotEnoughMessage(player);
+                return;
+            }
+            // Charge the player
+            if (!costManager.charge(player)) {
+                return;
+            }
+        }
+
+        // Play departure sound
+        soundManager.playDepartureSound(player);
 
         minecart.setMetadata("isTeleporting", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 
@@ -174,6 +193,9 @@ public class TrainListener implements Listener {
         }
 
         minecart.setVelocity(minecart.getLocation().getDirection().multiply(TELEPORT_IMPULSE));
+
+        // Play arrival sound
+        soundManager.playArrivalSound(player);
 
         String welcomeMessage = manager.getStationMessage(destinationName);
         player.sendMessage(msg().getWithPrefix("warp-confirm", "DESTINATION", destinationName));

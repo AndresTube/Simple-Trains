@@ -2,7 +2,10 @@
 
 A lightweight Minecraft plugin for creating fast-travel rail networks with train stations.
 
-**Version:** 1.2.0 | **API:** 1.20+ | **Author:** AndresTube
+**Version:** 1.3.0 | **Minecraft:** 1.20+ | **Java:** 17+ | **Author:** AndresTube
+
+[![SpigotMC](https://img.shields.io/badge/SpigotMC-SimpleTrains-orange)](https://www.spigotmc.org/)
+[![Modrinth](https://img.shields.io/badge/Modrinth-SimpleTrains-green)](https://modrinth.com/)
 
 ---
 
@@ -19,7 +22,7 @@ A lightweight Minecraft plugin for creating fast-travel rail networks with train
 - Create, delete, and configure stations via commands or GUI
 - Custom welcome messages with color code support (`&`)
 - Find nearby stations within range
-- XP cost system for creation and linking
+- Link request system with owner approval
 
 ### Minecart Registration
 - Use a renamed Name Tag on a minecart to make it "warp-eligible"
@@ -30,10 +33,28 @@ A lightweight Minecraft plugin for creating fast-travel rail networks with train
 - **Public links:** Anyone can travel
 - **Private links:** Only station owners can use
 
-### Fully Customizable Messages (NEW in 1.2.0)
+### Sound Effects (v1.3.0)
+- Configurable departure and arrival sounds
+- Adjustable volume and pitch per sound
+- Can be completely disabled
+
+### Creation Costs (v1.3.0)
+- Optional cost to create stations
+- Supports **XP levels**, **Vault economy**, or **items**
+- Custom item requirements with name matching
+- Admins bypass all costs
+
+### Travel Costs (v1.3.0)
+- Optional cost per travel
+- Supports **XP levels**, **Vault economy**, or **items**
+- Custom item requirements (e.g., "Train Ticket")
+- Admins bypass all costs
+
+### Fully Customizable Messages
 - All plugin messages are customizable via `messages.yml`
 - Support for color codes and placeholders
 - GUI titles, item names, and lore are all editable
+- Full multi-language support
 
 ---
 
@@ -52,6 +73,7 @@ A lightweight Minecraft plugin for creating fast-travel rail networks with train
 | `/train accept <A> <B>` | Accept link request | Owner of B |
 | `/train reject <A> <B>` | Reject link request | Owner of B |
 | `/train block <material>` | Set creation block | Admin |
+| `/train reload` | Reload configuration | Admin |
 | `/train help` | Show help menu | All |
 
 ---
@@ -73,19 +95,47 @@ A lightweight Minecraft plugin for creating fast-travel rail networks with train
 ```yaml
 settings:
   creation_block: GOLD_BLOCK      # Block required under rail to create station
-  creation_xp_cost: 5             # XP levels to create a station
-  link_creation_xp_cost: 3        # XP levels to request a link
-  link_acceptance_xp_cost: 2      # XP levels to accept a link
-  linking_requires_owner_acceptance: true  # Require approval for links
+
+# Creation cost (v1.3.0) - Cost to create new stations
+creation_cost:
+  enabled: true
+  type: XP                        # XP, VAULT, or ITEM
+  amount: 5
+  item:
+    material: GOLD_INGOT
+    amount: 1
+    name: ""                      # Optional: require specific item name
+
+# Sound configuration (v1.3.0)
+sounds:
+  enabled: true
+  departure:
+    sound: ENTITY_ENDERMAN_TELEPORT
+    volume: 1.0
+    pitch: 1.0
+  arrival:
+    sound: BLOCK_NOTE_BLOCK_CHIME
+    volume: 1.0
+    pitch: 1.2
+
+# Travel cost configuration (v1.3.0)
+travel_cost:
+  enabled: false                  # Enable to charge players per travel
+  type: XP                        # XP, VAULT, or ITEM
+  amount: 1
+  item:
+    material: GOLD_INGOT
+    amount: 1
+    name: ""                      # Optional: require specific item name
 
 messages:
   warp_confirm: '&aWarping to %DESTINATION%...'
-  station_welcome: '&e>> Welcome to %STATION% station! &6%MESSAGE%'
+  station_welcome: '&e>> &6%MESSAGE%'
 ```
 
-### messages.yml (NEW in 1.2.0)
+### messages.yml
 
-All plugin messages are now customizable! Edit `messages.yml` to change any text:
+All plugin messages are customizable! Edit `messages.yml` to change any text:
 
 ```yaml
 prefix: "&6[SimpleTrains] &r"
@@ -134,6 +184,23 @@ no-permission: "&cYou don't have permission for this command."
 
 ## Changelog
 
+### v1.3.0
+- Added **sound effects** for departure and arrival
+  - Configurable sounds, volume, and pitch
+  - Can be disabled entirely
+- Added **creation cost system**
+  - Supports XP levels, Vault economy, or items
+  - Custom item requirements with optional name matching
+  - Admins bypass costs automatically
+- Added **travel cost system**
+  - Supports XP levels, Vault economy, or items
+  - Custom item requirements with optional name matching
+  - Admins bypass costs automatically
+- Added `/train reload` command for hot-reloading configuration
+- Added full **tab completion** for all commands
+- Fixed GUI compatibility with translated messages
+- Optional Vault integration (soft-dependency)
+
 ### v1.2.0
 - Added complete messages system (`messages.yml`)
 - All plugin text is now fully customizable
@@ -154,6 +221,22 @@ no-permission: "&cYou don't have permission for this command."
 
 ---
 
+## Dependencies
+
+| Dependency | Required | Purpose |
+|------------|----------|---------|
+| Paper/Spigot 1.20+ | Yes | Server API |
+| Java 17+ | Yes | Runtime |
+| Vault | No | Economy support |
+
+---
+
 ## Support
 
-For issues or suggestions, contact **AndresTube** or open an issue on the repository.
+For issues or feature requests, please open an issue on the [GitHub repository](https://github.com/AndresTube/SimpleTrains).
+
+---
+
+## License
+
+This project is open source. Feel free to use, modify, and distribute.
