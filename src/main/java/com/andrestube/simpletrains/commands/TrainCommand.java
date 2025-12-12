@@ -1,9 +1,8 @@
-// src/main/java/com/andrestube/simpletrains/commands/TrainCommand.java
-
 package com.andrestube.simpletrains.commands;
 
 import com.andrestube.simpletrains.SimpleTrains;
 import com.andrestube.simpletrains.gui.MainGui;
+import com.andrestube.simpletrains.utils.Messages;
 import com.andrestube.simpletrains.utils.StationManager;
 import com.andrestube.simpletrains.utils.StationManager.LinkType;
 import org.bukkit.ChatColor;
@@ -16,19 +15,17 @@ import org.bukkit.block.Block;
 import org.bukkit.Location;
 import org.bukkit.Bukkit;
 
-import java.util.UUID; 
+import java.util.UUID;
 import java.util.Map;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.List;
 
 public class TrainCommand implements CommandExecutor {
 
     private final SimpleTrains plugin;
     private final StationManager manager;
-    private static final String PREFIX = ChatColor.GOLD + "[SimpleTrains] " + ChatColor.RESET;
     private static final String ADMIN_PERM = "simpletrains.admin";
 
     public TrainCommand(SimpleTrains plugin, StationManager manager) {
@@ -36,10 +33,14 @@ public class TrainCommand implements CommandExecutor {
         this.manager = manager;
     }
 
+    private Messages msg() {
+        return SimpleTrains.getMessages();
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(PREFIX + "Only players can use train commands.");
+            sender.sendMessage(msg().getWithPrefix("console-only-players"));
             return true;
         }
 
@@ -65,32 +66,32 @@ public class TrainCommand implements CommandExecutor {
             case "unlink":
                 handleUnlinkStations(p, args);
                 break;
-            case "transfer": 
+            case "transfer":
                 handleTransferOwner(p, args);
                 break;
-            case "near": 
+            case "near":
                 handleNearStations(p);
                 break;
             case "block":
                 handleSetBlock(p, args);
                 break;
-            case "message": 
+            case "message":
                 handleSetMessage(p, args);
                 break;
-            case "accept": 
+            case "accept":
                 handleLinkAccept(p, args);
                 break;
-            case "reject": 
+            case "reject":
                 handleLinkReject(p, args);
                 break;
             case "gui":
-                p.openInventory(MainGui.create(manager, p)); 
+                p.openInventory(MainGui.create(manager, p));
                 break;
             case "help":
                 sendHelpMessage(p);
                 break;
             default:
-                p.sendMessage(PREFIX + ChatColor.RED + "Unknown command. Use /train help.");
+                p.sendMessage(msg().getWithPrefix("unknown-command"));
         }
 
         return true;
@@ -98,209 +99,205 @@ public class TrainCommand implements CommandExecutor {
 
     private void handleSetStation(Player p, String[] args) {
         if (args.length < 2) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train set <stationName>");
+            p.sendMessage(msg().getWithPrefix("set-usage"));
             return;
         }
         String name = args[1];
-        
-        if (manager.stationExists(name)) { 
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("Station '%s' already exists!", name));
+
+        if (manager.stationExists(name)) {
+            p.sendMessage(msg().getWithPrefix("station-already-exists", "STATION", name));
             return;
         }
-        
-        // --- XP COST CHECK ---
+
         int cost = plugin.getConfig().getInt("settings.creation_xp_cost", 5);
         if (p.getLevel() < cost) {
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("You need %d XP levels to create a station. You currently have %d.", cost, p.getLevel()));
+            p.sendMessage(msg().getWithPrefix("not-enough-xp-create", "COST", String.valueOf(cost), "CURRENT", String.valueOf(p.getLevel())));
             return;
         }
-        
-        Block railBlock = p.getLocation().getBlock(); 
+
+        Block railBlock = p.getLocation().getBlock();
         Block baseBlock = railBlock.getRelative(0, -1, 0);
 
         Material requiredBlock = Material.matchMaterial(plugin.getCreationBlockType());
         if (requiredBlock == null) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Configuration Error: Invalid creation block type.");
+            p.sendMessage(msg().getWithPrefix("config-invalid-block"));
             return;
         }
-        
-        if (railBlock.getType().name().contains("RAIL") && baseBlock.getType() == requiredBlock) {
-            
-            // --- XP DEDUCTION ---
-            p.setLevel(p.getLevel() - cost);
 
-            manager.addStation(name, railBlock.getLocation(), p.getUniqueId()); 
-            p.sendMessage(PREFIX + ChatColor.GREEN + String.format("Station '%s' created successfully! (-%d XP)", name, cost));
+        if (railBlock.getType().name().contains("RAIL") && baseBlock.getType() == requiredBlock) {
+            p.setLevel(p.getLevel() - cost);
+            manager.addStation(name, railBlock.getLocation(), p.getUniqueId());
+            p.sendMessage(msg().getWithPrefix("station-created", "STATION", name, "COST", String.valueOf(cost)));
         } else {
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("You must be standing on a RAIL block, with a %s block directly beneath it.", requiredBlock.name()));
+            p.sendMessage(msg().getWithPrefix("wrong-block-position", "BLOCK", requiredBlock.name()));
         }
     }
-    
+
     private void handleDeleteStation(Player p, String[] args) {
         if (args.length < 2) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train delete <stationName>");
+            p.sendMessage(msg().getWithPrefix("delete-usage"));
             return;
         }
         String name = args[1];
-        
-        if (!manager.stationExists(name)) { 
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("Station '%s' does not exist.", name));
+
+        if (!manager.stationExists(name)) {
+            p.sendMessage(msg().getWithPrefix("station-not-found", "STATION", name));
             return;
         }
-        
+
         UUID ownerId = manager.getStationOwnerId(name);
-        
+
         if (!p.hasPermission(ADMIN_PERM) && (ownerId == null || !ownerId.equals(p.getUniqueId()))) {
-             p.sendMessage(PREFIX + ChatColor.RED + "You must be the owner of this station or an admin to delete it.");
-             return;
+            p.sendMessage(msg().getWithPrefix("not-owner-delete"));
+            return;
         }
 
         manager.removeStation(name);
-        p.sendMessage(PREFIX + ChatColor.GREEN + String.format("Station '%s' and all associated links deleted.", name));
+        p.sendMessage(msg().getWithPrefix("station-deleted", "STATION", name));
     }
 
     private void handleLinkStations(Player p, String[] args) {
         if (args.length < 3) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train link <stationA> <stationB> [private/public]");
+            p.sendMessage(msg().getWithPrefix("link-usage"));
             return;
         }
         String nameA = args[1];
         String nameB = args[2];
-        LinkType type = LinkType.PUBLIC; 
+        LinkType type = LinkType.PUBLIC;
 
         if (args.length > 3) {
             try {
                 type = LinkType.valueOf(args[3].toUpperCase());
             } catch (IllegalArgumentException e) {
-                p.sendMessage(PREFIX + ChatColor.RED + "Invalid link type. Use 'private' or 'public'. Defaulting to Public.");
+                p.sendMessage(msg().getWithPrefix("invalid-link-type"));
             }
         }
-        
+
         if (!manager.stationExists(nameA) || !manager.stationExists(nameB)) {
-             p.sendMessage(PREFIX + ChatColor.RED + "Both stations must exist to create a link.");
-             return;
+            p.sendMessage(msg().getWithPrefix("link-stations-not-exist"));
+            return;
         }
-        
+
         UUID ownerAId = manager.getStationOwnerId(nameA);
         if (!p.hasPermission(ADMIN_PERM) && (ownerAId == null || !ownerAId.equals(p.getUniqueId()))) {
-             p.sendMessage(PREFIX + ChatColor.RED + String.format("You must own station '%s' or be an admin to initiate a link.", nameA));
-             return;
+            p.sendMessage(msg().getWithPrefix("not-owner-link", "STATION", nameA));
+            return;
         }
 
         if (manager.getLinkedStations(nameA).contains(nameB)) {
-             p.sendMessage(PREFIX + ChatColor.YELLOW + String.format("Stations '%s' and '%s' are already linked.", nameA, nameB));
-             return;
+            p.sendMessage(msg().getWithPrefix("stations-already-linked", "STATION_A", nameA, "STATION_B", nameB));
+            return;
         }
-        
+
         UUID ownerBId = manager.getStationOwnerId(nameB);
-        
+
         if (ownerBId != null && !ownerBId.equals(p.getUniqueId())) {
             manager.registerLinkRequest(p.getUniqueId(), nameA, nameB);
-            
-            p.sendMessage(PREFIX + ChatColor.YELLOW + String.format("Link request sent for '%s' to owner of '%s'. Link Type: %s.", nameA, nameB, type.name()));
-            
+
+            p.sendMessage(msg().getWithPrefix("link-request-sent", "STATION_A", nameA, "STATION_B", nameB, "TYPE", type.name()));
+
             Player ownerB = Bukkit.getPlayer(ownerBId);
             if (ownerB != null && ownerB.isOnline()) {
-                 ownerB.sendMessage(PREFIX + ChatColor.AQUA + String.format("Link request received from %s to link your station '%s' with '%s'. Use /train accept %s %s.", p.getName(), nameB, nameA, nameA, nameB));
+                ownerB.sendMessage(msg().getWithPrefix("link-request-received", "PLAYER", p.getName(), "STATION_B", nameB, "STATION_A", nameA));
             }
-            
+
         } else {
             manager.linkStations(nameA, nameB, type);
-            p.sendMessage(PREFIX + ChatColor.GREEN + String.format("Stations '%s' and '%s' linked successfully as %s!", nameA, nameB, type.name()));
+            p.sendMessage(msg().getWithPrefix("stations-linked", "STATION_A", nameA, "STATION_B", nameB, "TYPE", type.name()));
         }
     }
-    
+
     private void handleUnlinkStations(Player p, String[] args) {
         if (args.length < 3) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train unlink <stationA> <stationB>");
+            p.sendMessage(msg().getWithPrefix("unlink-usage"));
             return;
         }
         String nameA = args[1];
         String nameB = args[2];
-        
+
         if (!manager.stationExists(nameA) || !manager.stationExists(nameB)) {
-             p.sendMessage(PREFIX + ChatColor.RED + "Both stations must exist.");
-             return;
+            p.sendMessage(msg().getWithPrefix("unlink-stations-not-exist"));
+            return;
         }
 
         UUID ownerAId = manager.getStationOwnerId(nameA);
         UUID ownerBId = manager.getStationOwnerId(nameB);
 
         boolean isOwner = (ownerAId != null && ownerAId.equals(p.getUniqueId())) || (ownerBId != null && ownerBId.equals(p.getUniqueId()));
-        
+
         if (!p.hasPermission(ADMIN_PERM) && !isOwner) {
-             p.sendMessage(PREFIX + ChatColor.RED + "You must own one of the stations or be an admin to unlink them.");
-             return;
+            p.sendMessage(msg().getWithPrefix("not-owner-unlink"));
+            return;
         }
 
         if (!manager.getLinkedStations(nameA).contains(nameB)) {
-             p.sendMessage(PREFIX + ChatColor.YELLOW + String.format("Stations '%s' and '%s' are not linked.", nameA, nameB));
-             return;
+            p.sendMessage(msg().getWithPrefix("stations-not-linked", "STATION_A", nameA, "STATION_B", nameB));
+            return;
         }
 
         manager.unlinkStations(nameA, nameB);
-        p.sendMessage(PREFIX + ChatColor.GREEN + String.format("Stations '%s' and '%s' unlinked.", nameA, nameB));
+        p.sendMessage(msg().getWithPrefix("stations-unlinked", "STATION_A", nameA, "STATION_B", nameB));
     }
-    
+
     private void handleTransferOwner(Player p, String[] args) {
         if (args.length < 3) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train transfer <stationName> <targetPlayer>");
+            p.sendMessage(msg().getWithPrefix("transfer-usage"));
             return;
         }
         String stationName = args[1];
         String targetName = args[2];
 
         if (!manager.stationExists(stationName)) {
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("Station '%s' does not exist.", stationName));
+            p.sendMessage(msg().getWithPrefix("station-not-found", "STATION", stationName));
             return;
         }
-        
+
         UUID ownerId = manager.getStationOwnerId(stationName);
         if (!p.hasPermission(ADMIN_PERM) && (ownerId == null || !ownerId.equals(p.getUniqueId()))) {
-             p.sendMessage(PREFIX + ChatColor.RED + "You must be the station owner or an admin to transfer ownership.");
-             return;
+            p.sendMessage(msg().getWithPrefix("not-owner-transfer"));
+            return;
         }
 
         Player target = Bukkit.getPlayer(targetName);
         if (target == null || !target.isOnline()) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Target player must be online.");
+            p.sendMessage(msg().getWithPrefix("target-not-online"));
             return;
         }
 
         manager.setStationOwner(stationName, target.getUniqueId());
-        p.sendMessage(PREFIX + ChatColor.GREEN + String.format("Ownership of '%s' transferred to %s.", stationName, target.getName()));
-        target.sendMessage(PREFIX + ChatColor.AQUA + String.format("You are now the owner of station '%s'.", stationName));
+        p.sendMessage(msg().getWithPrefix("ownership-transferred", "STATION", stationName, "PLAYER", target.getName()));
+        target.sendMessage(msg().getWithPrefix("ownership-received", "STATION", stationName));
     }
 
     private void handleNearStations(Player p) {
-        final int MAX_DISTANCE = 500; 
-        
+        final int MAX_DISTANCE = 500;
+
         Map<String, Location> allStations = manager.getAllStationNames().stream()
-            .filter(manager::stationExists) 
-            .collect(Collectors.toMap(name -> name, manager::getStationLocation));
-        
+                .filter(manager::stationExists)
+                .collect(Collectors.toMap(name -> name, manager::getStationLocation));
+
         Map<String, AtomicInteger> stationDistances = allStations.entrySet().stream()
-            .filter(entry -> entry.getValue() != null && entry.getValue().getWorld().equals(p.getWorld()))
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> new AtomicInteger((int) entry.getValue().distance(p.getLocation()))
-            ))
-            .entrySet().stream()
-            .filter(entry -> entry.getValue().get() <= MAX_DISTANCE)
-            .sorted(Map.Entry.comparingByValue(Comparator.comparingInt(AtomicInteger::get)))
-            .collect(Collectors.toMap(
-                Map.Entry::getKey, 
-                Map.Entry::getValue, 
-                (e1, e2) -> e1, 
-                LinkedHashMap::new
-            ));
+                .filter(entry -> entry.getValue() != null && entry.getValue().getWorld().equals(p.getWorld()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> new AtomicInteger((int) entry.getValue().distance(p.getLocation()))
+                ))
+                .entrySet().stream()
+                .filter(entry -> entry.getValue().get() <= MAX_DISTANCE)
+                .sorted(Map.Entry.comparingByValue(Comparator.comparingInt(AtomicInteger::get)))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
 
         if (stationDistances.isEmpty()) {
-            p.sendMessage(PREFIX + ChatColor.YELLOW + "No stations found within " + MAX_DISTANCE + " blocks in this world.");
+            p.sendMessage(msg().getWithPrefix("no-stations-nearby", "DISTANCE", String.valueOf(MAX_DISTANCE)));
             return;
         }
-        
-        p.sendMessage(ChatColor.DARK_GRAY + "--- Stations Near You (Max " + MAX_DISTANCE + "m) ---");
+
+        p.sendMessage(msg().get("nearby-header", "DISTANCE", String.valueOf(MAX_DISTANCE)));
         stationDistances.forEach((name, distance) -> {
             ChatColor color = distance.get() < 50 ? ChatColor.GREEN : (distance.get() < 200 ? ChatColor.YELLOW : ChatColor.WHITE);
             p.sendMessage(color + name + ChatColor.GRAY + " (" + distance.get() + "m)");
@@ -309,122 +306,122 @@ public class TrainCommand implements CommandExecutor {
 
     private void handleLinkAccept(Player p, String[] args) {
         if (args.length < 3) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train accept <initiatingStation> <receivingStation>");
+            p.sendMessage(msg().getWithPrefix("accept-usage"));
             return;
         }
-        String nameA = args[1]; // Initiating Station (Requester's)
-        String nameB = args[2]; // Receiving Station (Your Station)
+        String nameA = args[1];
+        String nameB = args[2];
 
         UUID ownerId = manager.getStationOwnerId(nameB);
         if (!p.hasPermission(ADMIN_PERM) && (ownerId == null || !ownerId.equals(p.getUniqueId()))) {
-             p.sendMessage(PREFIX + ChatColor.RED + "You must own station " + nameB + " or be an admin to accept links.");
-             return;
+            p.sendMessage(msg().getWithPrefix("not-owner-accept", "STATION", nameB));
+            return;
         }
-        
+
         UUID requesterId = manager.getPendingRequesterId(nameB);
         String initiatingStation = manager.getPendingInitiatingStation(nameB);
 
         if (requesterId == null || !initiatingStation.equals(nameA)) {
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("No pending link request found from %s to %s.", nameA, nameB));
+            p.sendMessage(msg().getWithPrefix("no-pending-request", "STATION_A", nameA, "STATION_B", nameB));
             return;
         }
-        
-        manager.linkStations(nameA, nameB, LinkType.PUBLIC); 
+
+        manager.linkStations(nameA, nameB, LinkType.PUBLIC);
         manager.clearLinkRequest(nameB);
-        p.sendMessage(PREFIX + ChatColor.GREEN + String.format("Link to '%s' accepted! Stations are now linked as PUBLIC.", nameA));
-        
+        p.sendMessage(msg().getWithPrefix("link-accepted", "STATION", nameA));
+
         Player requester = Bukkit.getPlayer(requesterId);
         if (requester != null && requester.isOnline()) {
-             requester.sendMessage(PREFIX + ChatColor.AQUA + String.format("Your link request from '%s' to '%s' has been accepted!", nameA, nameB));
+            requester.sendMessage(msg().getWithPrefix("link-request-accepted", "STATION_A", nameA, "STATION_B", nameB));
         }
     }
-    
+
     private void handleLinkReject(Player p, String[] args) {
         if (args.length < 3) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train reject <initiatingStation> <receivingStation>");
+            p.sendMessage(msg().getWithPrefix("reject-usage"));
             return;
         }
-        String nameA = args[1]; // Initiating Station (Requester's)
-        String nameB = args[2]; // Receiving Station (Your Station)
+        String nameA = args[1];
+        String nameB = args[2];
 
         UUID ownerId = manager.getStationOwnerId(nameB);
         if (!p.hasPermission(ADMIN_PERM) && (ownerId == null || !ownerId.equals(p.getUniqueId()))) {
-             p.sendMessage(PREFIX + ChatColor.RED + "You must own station " + nameB + " or be an admin to reject links.");
-             return;
+            p.sendMessage(msg().getWithPrefix("not-owner-reject", "STATION", nameB));
+            return;
         }
-        
+
         UUID requesterId = manager.getPendingRequesterId(nameB);
         String initiatingStation = manager.getPendingInitiatingStation(nameB);
 
         if (requesterId == null || !initiatingStation.equals(nameA)) {
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("No pending link request found from %s to %s.", nameA, nameB));
+            p.sendMessage(msg().getWithPrefix("no-pending-request", "STATION_A", nameA, "STATION_B", nameB));
             return;
         }
 
         manager.clearLinkRequest(nameB);
-        p.sendMessage(PREFIX + ChatColor.RED + String.format("Link request from '%s' rejected.", nameA));
-        
+        p.sendMessage(msg().getWithPrefix("link-rejected", "STATION", nameA));
+
         Player requester = Bukkit.getPlayer(requesterId);
         if (requester != null && requester.isOnline()) {
-             requester.sendMessage(PREFIX + ChatColor.RED + String.format("Your link request from '%s' to '%s' has been rejected.", nameA, nameB));
+            requester.sendMessage(msg().getWithPrefix("link-request-rejected", "STATION_A", nameA, "STATION_B", nameB));
         }
     }
 
     private void handleSetBlock(Player p, String[] args) {
         if (!p.hasPermission(ADMIN_PERM)) {
-             p.sendMessage(PREFIX + ChatColor.RED + "You do not have permission for this command.");
-             return;
+            p.sendMessage(msg().getWithPrefix("no-permission"));
+            return;
         }
 
         if (args.length < 2) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train block <MaterialName>");
+            p.sendMessage(msg().getWithPrefix("block-usage"));
             return;
         }
         String blockName = args[1].toUpperCase();
-        
+
         if (Material.matchMaterial(blockName) == null) {
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("Material '%s' is not recognized.", blockName));
+            p.sendMessage(msg().getWithPrefix("invalid-material", "MATERIAL", blockName));
             return;
         }
 
         plugin.setCreationBlockType(blockName);
-        p.sendMessage(PREFIX + ChatColor.GREEN + String.format("Station creation block set to %s.", blockName));
+        p.sendMessage(msg().getWithPrefix("block-set", "BLOCK", blockName));
     }
-    
+
     private void handleSetMessage(Player p, String[] args) {
         if (args.length < 3) {
-            p.sendMessage(PREFIX + ChatColor.RED + "Usage: /train message <stationName> <message>");
+            p.sendMessage(msg().getWithPrefix("message-usage"));
             return;
         }
         String name = args[1];
         String message = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
-        
-        if (!manager.stationExists(name)) { 
-            p.sendMessage(PREFIX + ChatColor.RED + String.format("Station '%s' does not exist!", name));
+
+        if (!manager.stationExists(name)) {
+            p.sendMessage(msg().getWithPrefix("message-station-not-found", "STATION", name));
             return;
         }
 
         UUID ownerId = manager.getStationOwnerId(name);
         if (!p.hasPermission(ADMIN_PERM) && (ownerId == null || !ownerId.equals(p.getUniqueId()))) {
-             p.sendMessage(PREFIX + ChatColor.RED + "You must be the station owner or an admin to change the message.");
-             return;
+            p.sendMessage(msg().getWithPrefix("not-owner-message"));
+            return;
         }
 
         manager.setStationMessage(name, message);
-        p.sendMessage(PREFIX + ChatColor.GREEN + String.format("Message for '%s' updated. Preview: %s", name, ChatColor.translateAlternateColorCodes('&', message)));
+        p.sendMessage(msg().getWithPrefix("message-updated", "STATION", name, "MESSAGE", ChatColor.translateAlternateColorCodes('&', message)));
     }
 
     private void sendHelpMessage(Player p) {
         int xpCost = plugin.getConfig().getInt("settings.creation_xp_cost", 5);
-        p.sendMessage(ChatColor.DARK_GRAY + "--- SimpleTrains Help ---");
-        p.sendMessage(ChatColor.YELLOW + "/train set <name> " + ChatColor.GRAY + "-> Creates a station (-" + xpCost + " XP).");
-        p.sendMessage(ChatColor.YELLOW + "/train delete <name> " + ChatColor.GRAY + "-> Deletes a station.");
-        p.sendMessage(ChatColor.YELLOW + "/train link <A> <B> [type] " + ChatColor.GRAY + "-> Sends link request (Type: public/private).");
-        p.sendMessage(ChatColor.YELLOW + "/train transfer <st> <player> " + ChatColor.GRAY + "-> Transfers ownership (Owner/Admin).");
-        p.sendMessage(ChatColor.YELLOW + "/train near " + ChatColor.GRAY + "-> Lists nearby stations.");
-        p.sendMessage(ChatColor.YELLOW + "/train gui " + ChatColor.GRAY + "-> Opens the station list GUI.");
-        p.sendMessage(ChatColor.YELLOW + "/train accept/reject <A> <B> " + ChatColor.GRAY + "-> Accept/Reject a link request.");
-        p.sendMessage(ChatColor.YELLOW + "/train message <st> <&msg> " + ChatColor.GRAY + "-> Sets station welcome message.");
-        p.sendMessage(ChatColor.YELLOW + "/train block <mat> " + ChatColor.GRAY + "-> (Admin) Sets creation block.");
+        p.sendMessage(msg().get("help-header"));
+        p.sendMessage(msg().get("help-set", "COST", String.valueOf(xpCost)));
+        p.sendMessage(msg().get("help-delete"));
+        p.sendMessage(msg().get("help-link"));
+        p.sendMessage(msg().get("help-transfer"));
+        p.sendMessage(msg().get("help-near"));
+        p.sendMessage(msg().get("help-gui"));
+        p.sendMessage(msg().get("help-accept-reject"));
+        p.sendMessage(msg().get("help-message"));
+        p.sendMessage(msg().get("help-block"));
     }
 }

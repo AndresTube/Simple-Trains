@@ -4,8 +4,9 @@ import com.andrestube.simpletrains.commands.TrainCommand;
 import com.andrestube.simpletrains.listeners.ChatListener;
 import com.andrestube.simpletrains.listeners.GuiListener;
 import com.andrestube.simpletrains.listeners.TrainListener;
-import com.andrestube.simpletrains.listeners.TagListener; 
+import com.andrestube.simpletrains.listeners.TagListener;
 import com.andrestube.simpletrains.utils.StationManager;
+import com.andrestube.simpletrains.utils.Messages;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class SimpleTrains extends JavaPlugin {
     
     private static SimpleTrains instance;
+    private static Messages messages;
     private StationManager stationManager;
     private MessageInputHandler messageInputHandler;
     private String creationBlockType = "GOLD_BLOCK"; 
@@ -30,6 +32,10 @@ public final class SimpleTrains extends JavaPlugin {
 
     public static SimpleTrains getInstance() {
         return instance;
+    }
+
+    public static Messages getMessages() {
+        return messages;
     }
 
     public StationManager getStationManager() {
@@ -82,8 +88,11 @@ public final class SimpleTrains extends JavaPlugin {
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
-        
-        loadConfigSettings(); 
+
+        // Initialize messages system
+        messages = new Messages(this);
+
+        loadConfigSettings();
 
         this.stationManager = new StationManager(this);
         this.messageInputHandler = new MessageInputHandler();

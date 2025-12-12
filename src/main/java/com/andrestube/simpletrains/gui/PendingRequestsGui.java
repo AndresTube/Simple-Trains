@@ -1,6 +1,7 @@
 package com.andrestube.simpletrains.gui;
 
 import com.andrestube.simpletrains.SimpleTrains;
+import com.andrestube.simpletrains.utils.Messages;
 import com.andrestube.simpletrains.utils.StationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,53 +21,45 @@ public class PendingRequestsGui {
     private static final int INVENTORY_SIZE = 54;
     private static final int BACK_BUTTON_SLOT = 49;
 
-    /**
-     * Creates the Pending Link Requests GUI for a specific station.
-     * @param plugin The SimpleTrains plugin instance.
-     * @param manager The StationManager.
-     * @param receivingStation The station that received the requests.
-     * @return The populated Inventory.
-     */
+    private static Messages msg() {
+        return SimpleTrains.getMessages();
+    }
+
     public static Inventory create(SimpleTrains plugin, StationManager manager, String receivingStation) {
-        String fullTitle = GUI_NAME + ChatColor.RESET + " - " + receivingStation; 
+        String fullTitle = GUI_NAME + ChatColor.RESET + " - " + receivingStation;
         Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, fullTitle);
 
-        int slot = 9; 
-        
-        // Iterate through all stations to find pending requests targeting this receivingStation
+        int slot = 9;
+
         for (String initiatingStation : manager.getAllStationNames()) {
-            // Check if there is a request pending for this pair (receivingStation, initiatingStation)
             if (manager.isRequestPending(receivingStation, initiatingStation)) {
-                
+
                 UUID requesterId = manager.getPendingRequesterId(receivingStation);
-                // We use getOfflinePlayer here as the requester might not be online
-                OfflinePlayer requester = Bukkit.getOfflinePlayer(requesterId); 
-                
+                OfflinePlayer requester = Bukkit.getOfflinePlayer(requesterId);
+
                 if (slot >= INVENTORY_SIZE - 9) break;
 
-                // Use the configured cost from the main plugin instance
                 int acceptanceCost = plugin.getLinkAcceptanceXpCost();
-                
-                // Create Request Item
+
                 ItemStack requestItem = new ItemStack(Material.BOOK);
                 ItemMeta meta = requestItem.getItemMeta();
-                
+
                 meta.setDisplayName(ChatColor.YELLOW + "Request from " + initiatingStation);
-                
+
                 List<String> lore = new ArrayList<>();
-                lore.add(ChatColor.GRAY + "Requester: " + ChatColor.AQUA + requester.getName());
-                lore.add(ChatColor.GRAY + "Station: " + ChatColor.AQUA + initiatingStation);
+                lore.add(msg().get("gui-lore-requester", "PLAYER", requester.getName()));
+                lore.add(msg().get("gui-lore-station", "STATION", initiatingStation));
                 lore.add(" ");
-                lore.add(ChatColor.GREEN + "Left Click: " + ChatColor.DARK_GREEN + "ACCEPT (Cost: " + acceptanceCost + " XP)");
-                lore.add(ChatColor.RED + "Right Click: " + ChatColor.DARK_RED + "REJECT");
-                
+                lore.add(msg().get("gui-lore-accept-cost", "COST", String.valueOf(acceptanceCost)));
+                lore.add(msg().get("gui-lore-reject"));
+
                 meta.setLore(lore);
                 requestItem.setItemMeta(meta);
-                
+
                 inventory.setItem(slot++, requestItem);
             }
         }
-        
+
         // Fill header and main area with filler panes
         for (int i = 0; i < INVENTORY_SIZE - 9; i++) {
             if (inventory.getItem(i) == null || inventory.getItem(i).getType() == Material.AIR) {
@@ -74,13 +67,13 @@ public class PendingRequestsGui {
                 inventory.setItem(i, createFillerItem(fillerMat, " "));
             }
         }
-        
+
         // Back Button (Slot 49)
         inventory.setItem(BACK_BUTTON_SLOT, createFillerItem(
-            Material.SPECTRAL_ARROW, 
-            ChatColor.RED + "Back to Link Manager"
+                Material.SPECTRAL_ARROW,
+                msg().get("gui-item-back-link-manager")
         ));
-        
+
         // Fill remaining bottom row slots with dark filler
         for (int i = INVENTORY_SIZE - 9; i < INVENTORY_SIZE; i++) {
             if (inventory.getItem(i) == null || inventory.getItem(i).getType() == Material.AIR) {

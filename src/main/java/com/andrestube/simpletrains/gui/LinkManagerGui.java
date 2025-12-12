@@ -1,5 +1,7 @@
 package com.andrestube.simpletrains.gui;
 
+import com.andrestube.simpletrains.SimpleTrains;
+import com.andrestube.simpletrains.utils.Messages;
 import com.andrestube.simpletrains.utils.StationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,72 +22,69 @@ public class LinkManagerGui {
     private static final int REQUEST_NEW_SLOT = 47;
     private static final int PENDING_REQUESTS_SLOT = 51;
 
-    /**
-     * Creates the Link Management GUI for a specific station.
-     * @param manager The StationManager.
-     * @param stationName The station whose links are being managed.
-     * @return The populated Inventory.
-     */
+    private static Messages msg() {
+        return SimpleTrains.getMessages();
+    }
+
     public static Inventory create(StationManager manager, String stationName) {
-        String fullTitle = GUI_NAME + ChatColor.RESET + " - " + stationName; 
+        String fullTitle = GUI_NAME + ChatColor.RESET + " - " + stationName;
         Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, fullTitle);
 
         Map<String, StationManager.LinkType> linksMap = manager.getStationLinksMap(stationName);
-        
-        // 1. Add Current Linked Stations (Starting at slot 9, leaving top row for decoration)
-        int slot = 9; 
+
+        // 1. Add Current Linked Stations (Starting at slot 9)
+        int slot = 9;
         for (Map.Entry<String, StationManager.LinkType> entry : linksMap.entrySet()) {
             if (slot >= INVENTORY_SIZE - 9) break;
 
             String linkedStation = entry.getKey();
             StationManager.LinkType type = entry.getValue();
-            
+
             ItemStack linkItem = new ItemStack(type == StationManager.LinkType.PUBLIC ? Material.CHAIN : Material.LEVER);
             ItemMeta meta = linkItem.getItemMeta();
-            
+
             meta.setDisplayName(ChatColor.AQUA + linkedStation);
-            
+
             List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "Link Type: " + (type == StationManager.LinkType.PUBLIC ? ChatColor.GREEN + "PUBLIC" : ChatColor.RED + "PRIVATE"));
-            lore.add(ChatColor.YELLOW + "Left Click: " + ChatColor.RED + "UNLINK STATION");
-            
+            lore.add(type == StationManager.LinkType.PUBLIC ? msg().get("gui-lore-link-public") : msg().get("gui-lore-link-private"));
+            lore.add(msg().get("gui-lore-left-click-unlink"));
+
             meta.setLore(lore);
             linkItem.setItemMeta(meta);
-            
+
             inventory.setItem(slot++, linkItem);
         }
-        
+
         // 2. Fill top row and main area with filler panes
         for (int i = 0; i < INVENTORY_SIZE - 9; i++) {
             if (inventory.getItem(i) == null || inventory.getItem(i).getType() == Material.AIR) {
-                // Use light blue for the header row (0-8) and gray for the main area
                 Material fillerMat = (i < 9) ? Material.LIGHT_BLUE_STAINED_GLASS_PANE : Material.GRAY_STAINED_GLASS_PANE;
                 inventory.setItem(i, createFillerItem(fillerMat, " "));
             }
         }
-        
-        // 3. Add Control Items (Bottom row: 45-53)
-        
+
+        // 3. Add Control Items (Bottom row)
+
         // Request New Link Button (Slot 47)
         inventory.setItem(REQUEST_NEW_SLOT, createControlItem(
-            Material.PAPER, 
-            ChatColor.GREEN + "Request New Link",
-            ChatColor.GRAY + "Request a connection to another station."
+                Material.PAPER,
+                msg().get("gui-item-request-new-link"),
+                msg().get("gui-lore-request-link-desc")
         ));
-        
+
         // View Pending Requests Button (Slot 51)
         inventory.setItem(PENDING_REQUESTS_SLOT, createControlItem(
-            Material.CLOCK, 
-            ChatColor.YELLOW + "View Pending Requests",
-            ChatColor.GRAY + "Accept or reject incoming link requests."
+                Material.CLOCK,
+                msg().get("gui-item-view-pending"),
+                msg().get("gui-lore-pending-desc")
         ));
 
         // Back to Config Button (Slot 49)
         inventory.setItem(BACK_BUTTON_SLOT, createControlItem(
-            Material.SPECTRAL_ARROW, 
-            ChatColor.RED + "Back to Configuration"
+                Material.SPECTRAL_ARROW,
+                msg().get("gui-item-back-config")
         ));
-        
+
         // Fill remaining bottom row slots with dark filler
         for (int i = INVENTORY_SIZE - 9; i < INVENTORY_SIZE; i++) {
             if (inventory.getItem(i) == null || inventory.getItem(i).getType() == Material.AIR) {
@@ -110,7 +109,7 @@ public class LinkManagerGui {
         item.setItemMeta(meta);
         return item;
     }
-    
+
     private static ItemStack createControlItem(Material material, String name, String... lore) {
         return createFillerItem(material, name, lore);
     }

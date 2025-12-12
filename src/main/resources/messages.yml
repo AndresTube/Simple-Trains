@@ -1,0 +1,423 @@
+# ============================================
+# SimpleTrains - Messages Configuration
+# ============================================
+# All plugin messages can be customized here.
+# Use '&' for color codes (e.g., &a = green, &c = red)
+# Available placeholders are listed above each message.
+# ============================================
+
+# General prefix for all messages
+prefix: "&6[SimpleTrains] &r"
+
+# ============================================
+# COMMAND MESSAGES
+# ============================================
+
+# Console trying to use player-only commands
+console-only-players: "&cOnly players can use train commands."
+
+# Unknown subcommand
+# Placeholders: none
+unknown-command: "&cUnknown command. Use /train help."
+
+# ============================================
+# STATION CREATION / DELETION
+# ============================================
+
+# Usage message for /train set
+set-usage: "&cUsage: /train set <stationName>"
+
+# Station already exists
+# Placeholders: %STATION%
+station-already-exists: "&cStation '%STATION%' already exists!"
+
+# Not enough XP to create station
+# Placeholders: %COST%, %CURRENT%
+not-enough-xp-create: "&cYou need %COST% XP levels to create a station. You currently have %CURRENT%."
+
+# Invalid creation block in config
+config-invalid-block: "&cConfiguration Error: Invalid creation block type."
+
+# Player not standing on correct blocks
+# Placeholders: %BLOCK%
+wrong-block-position: "&cYou must be standing on a RAIL block, with a %BLOCK% block directly beneath it."
+
+# Station created successfully
+# Placeholders: %STATION%, %COST%
+station-created: "&aStation '%STATION%' created successfully! (-%COST% XP)"
+
+# Usage message for /train delete
+delete-usage: "&cUsage: /train delete <stationName>"
+
+# Station does not exist
+# Placeholders: %STATION%
+station-not-found: "&cStation '%STATION%' does not exist."
+
+# Not owner/admin to delete
+not-owner-delete: "&cYou must be the owner of this station or an admin to delete it."
+
+# Station deleted successfully
+# Placeholders: %STATION%
+station-deleted: "&aStation '%STATION%' and all associated links deleted."
+
+# ============================================
+# LINKING STATIONS
+# ============================================
+
+# Usage message for /train link
+link-usage: "&cUsage: /train link <stationA> <stationB> [private/public]"
+
+# Invalid link type
+invalid-link-type: "&cInvalid link type. Use 'private' or 'public'. Defaulting to Public."
+
+# Both stations must exist to link
+link-stations-not-exist: "&cBoth stations must exist to create a link."
+
+# Not owner to initiate link
+# Placeholders: %STATION%
+not-owner-link: "&cYou must own station '%STATION%' or be an admin to initiate a link."
+
+# Stations already linked
+# Placeholders: %STATION_A%, %STATION_B%
+stations-already-linked: "&eStations '%STATION_A%' and '%STATION_B%' are already linked."
+
+# Link request sent
+# Placeholders: %STATION_A%, %STATION_B%, %TYPE%
+link-request-sent: "&eLink request sent for '%STATION_A%' to owner of '%STATION_B%'. Link Type: %TYPE%."
+
+# Link request received notification
+# Placeholders: %PLAYER%, %STATION_B%, %STATION_A%
+link-request-received: "&bLink request received from %PLAYER% to link your station '%STATION_B%' with '%STATION_A%'. Use /train accept %STATION_A% %STATION_B%."
+
+# Stations linked successfully
+# Placeholders: %STATION_A%, %STATION_B%, %TYPE%
+stations-linked: "&aStations '%STATION_A%' and '%STATION_B%' linked successfully as %TYPE%!"
+
+# ============================================
+# UNLINKING STATIONS
+# ============================================
+
+# Usage message for /train unlink
+unlink-usage: "&cUsage: /train unlink <stationA> <stationB>"
+
+# Both stations must exist
+unlink-stations-not-exist: "&cBoth stations must exist."
+
+# Not owner to unlink
+not-owner-unlink: "&cYou must own one of the stations or be an admin to unlink them."
+
+# Stations not linked
+# Placeholders: %STATION_A%, %STATION_B%
+stations-not-linked: "&eStations '%STATION_A%' and '%STATION_B%' are not linked."
+
+# Stations unlinked successfully
+# Placeholders: %STATION_A%, %STATION_B%
+stations-unlinked: "&aStations '%STATION_A%' and '%STATION_B%' unlinked."
+
+# ============================================
+# TRANSFER OWNERSHIP
+# ============================================
+
+# Usage message for /train transfer
+transfer-usage: "&cUsage: /train transfer <stationName> <targetPlayer>"
+
+# Not owner to transfer
+not-owner-transfer: "&cYou must be the station owner or an admin to transfer ownership."
+
+# Target player not online
+target-not-online: "&cTarget player must be online."
+
+# Ownership transferred successfully
+# Placeholders: %STATION%, %PLAYER%
+ownership-transferred: "&aOwnership of '%STATION%' transferred to %PLAYER%."
+
+# You received ownership notification
+# Placeholders: %STATION%
+ownership-received: "&bYou are now the owner of station '%STATION%'."
+
+# ============================================
+# NEARBY STATIONS
+# ============================================
+
+# No stations found nearby
+# Placeholders: %DISTANCE%
+no-stations-nearby: "&eNo stations found within %DISTANCE% blocks in this world."
+
+# Header for nearby stations list
+# Placeholders: %DISTANCE%
+nearby-header: "&8--- Stations Near You (Max %DISTANCE%m) ---"
+
+# ============================================
+# LINK ACCEPT / REJECT
+# ============================================
+
+# Usage message for /train accept
+accept-usage: "&cUsage: /train accept <initiatingStation> <receivingStation>"
+
+# Not owner to accept links
+# Placeholders: %STATION%
+not-owner-accept: "&cYou must own station %STATION% or be an admin to accept links."
+
+# No pending request found
+# Placeholders: %STATION_A%, %STATION_B%
+no-pending-request: "&cNo pending link request found from %STATION_A% to %STATION_B%."
+
+# Link accepted successfully
+# Placeholders: %STATION%
+link-accepted: "&aLink to '%STATION%' accepted! Stations are now linked as PUBLIC."
+
+# Your link request was accepted notification
+# Placeholders: %STATION_A%, %STATION_B%
+link-request-accepted: "&bYour link request from '%STATION_A%' to '%STATION_B%' has been accepted!"
+
+# Usage message for /train reject
+reject-usage: "&cUsage: /train reject <initiatingStation> <receivingStation>"
+
+# Not owner to reject links
+# Placeholders: %STATION%
+not-owner-reject: "&cYou must own station %STATION% or be an admin to reject links."
+
+# Link rejected successfully
+# Placeholders: %STATION%
+link-rejected: "&cLink request from '%STATION%' rejected."
+
+# Your link request was rejected notification
+# Placeholders: %STATION_A%, %STATION_B%
+link-request-rejected: "&cYour link request from '%STATION_A%' to '%STATION_B%' has been rejected."
+
+# ============================================
+# SET BLOCK (Admin)
+# ============================================
+
+# No permission
+no-permission: "&cYou do not have permission for this command."
+
+# Usage message for /train block
+block-usage: "&cUsage: /train block <MaterialName>"
+
+# Material not recognized
+# Placeholders: %MATERIAL%
+invalid-material: "&cMaterial '%MATERIAL%' is not recognized."
+
+# Block type set successfully
+# Placeholders: %BLOCK%
+block-set: "&aStation creation block set to %BLOCK%."
+
+# ============================================
+# SET MESSAGE
+# ============================================
+
+# Usage message for /train message
+message-usage: "&cUsage: /train message <stationName> <message>"
+
+# Station not found for message
+# Placeholders: %STATION%
+message-station-not-found: "&cStation '%STATION%' does not exist!"
+
+# Not owner to change message
+not-owner-message: "&cYou must be the station owner or an admin to change the message."
+
+# Message updated successfully
+# Placeholders: %STATION%, %MESSAGE%
+message-updated: "&aMessage for '%STATION%' updated. Preview: %MESSAGE%"
+
+# ============================================
+# TRAIN LISTENER (Teleportation)
+# ============================================
+
+# No accessible destinations at station
+# Placeholders: %STATION%
+no-accessible-destinations: "&eThis station (%STATION%) has no accessible destinations for you."
+
+# Destination location not found
+destination-not-found: "&cError: Destination station location not found!"
+
+# Minecart teleport failed
+teleport-failed: "&cMinecart teleport failed on the server side."
+
+# Warp confirmation message
+# Placeholders: %DESTINATION%
+warp-confirm: "&aWarping to %DESTINATION%..."
+
+# Welcome message format on arrival
+# Placeholders: %STATION%, %MESSAGE%
+station-welcome: "&e>> Welcome to %STATION% station! &6%MESSAGE%"
+
+# ============================================
+# GUI LISTENER MESSAGES
+# ============================================
+
+# Missing minecart data error
+gui-missing-minecart-data: "&cError: Missing minecart data in item lore."
+
+# Invalid minecart ID error
+gui-invalid-minecart-id: "&cError: Invalid minecart ID in item lore."
+
+# Minecart not found
+gui-minecart-not-found: "&cMinecart not found. Please retry."
+
+# Starting station data missing
+gui-start-station-missing: "&cError: Starting station data is missing."
+
+# No permission to configure station
+gui-no-permission-configure: "&cYou do not have permission to configure this station."
+
+# Configuration station not found
+gui-config-station-not-found: "&cError: Configuration station not found."
+
+# Already setting a message
+gui-already-setting-message: "&cYou are already setting a message/link. Please finish that first."
+
+# Enter new welcome message prompt
+# Placeholders: %STATION%
+gui-enter-message: "&aEnter new welcome message for station &b%STATION% &ain chat."
+
+# Use color codes hint
+gui-color-codes-hint: "&eUse '&' for color codes. Type 'cancel' to stop."
+
+# Delete confirmation
+# Placeholders: %STATION%
+gui-delete-confirm: "&cAre you sure you want to delete %STATION%? Use /train delete %STATION% to confirm."
+
+# Enter link station name prompt
+gui-enter-link-station: "&aEnter the name of the station you wish to link to in chat."
+
+# Link request hint
+gui-link-request-hint: "&eThis sends a request to the other station's owner. Type 'cancel' to stop."
+
+# Successfully unlinked stations
+# Placeholders: %STATION_A%, %STATION_B%
+gui-unlinked: "&aSuccessfully unlinked &b%STATION_A% &aand &b%STATION_B%&a."
+
+# Request data expired
+gui-request-expired: "&cError: Request data expired or corrupted."
+
+# Requester data missing
+gui-requester-missing: "&cError: Requester data missing."
+
+# Link accepted in GUI
+# Placeholders: %STATION%
+gui-link-accepted: "&aLink to &b%STATION% &aaccepted!"
+
+# Link rejected in GUI
+# Placeholders: %STATION%
+gui-link-rejected: "&cLink request from &b%STATION% &crejected."
+
+# ============================================
+# CHAT LISTENER MESSAGES
+# ============================================
+
+# Configuration cancelled
+config-cancelled: "&eConfiguration cancelled."
+
+# Station does not exist (for linking)
+# Placeholders: %STATION%
+chat-station-not-exist: "&cError: Station %STATION% does not exist."
+
+# Destination must have owner
+chat-destination-no-owner: "&cError: Destination station must have an owner to receive a request."
+
+# Stations already linked (chat)
+# Placeholders: %STATION_A%, %STATION_B%
+chat-already-linked: "&cError: Stations %STATION_A% and %STATION_B% are already linked."
+
+# Not enough XP (generic)
+# Placeholders: %COST%
+error-not-enough-xp: "&cYou need %COST% XP levels to perform this action."
+
+# Link request sent (chat)
+# Placeholders: %RECEIVING_STATION%
+chat-link-request-sent: "&eLink request sent to the owner of &b%RECEIVING_STATION%&e. Awaiting approval."
+
+# Link request received (chat notification)
+# Placeholders: %INITIATOR%, %INITIATING_STATION%, %RECEIVING_STATION%
+chat-link-request-received: "&bLink request from &a%INITIATOR% &bto link &a%INITIATING_STATION% &bwith your station &a%RECEIVING_STATION%&b."
+
+# Link acceptance hint
+# Placeholders: %INITIATING_STATION%
+chat-link-acceptance-hint: "&eUse /train gui or accept via the GUI to respond."
+
+# Instant link success
+# Placeholders: %STATION_A%, %STATION_B%
+chat-instant-link-success: "&aStation &b%STATION_A% &asuccessfully linked to &b%STATION_B% &a(Public Link)."
+
+# Message updated (chat)
+# Placeholders: %STATION%
+chat-message-updated: "&aWelcome message for &b%STATION% &asuccessfully updated."
+
+# Message preview label
+chat-message-preview: "&ePreview: "
+
+# ============================================
+# GUI TITLES
+# ============================================
+
+gui-title-station-list: "&3Station List"
+gui-title-my-stations: "&eMy Stations"
+gui-title-all-stations: "&eAll Stations"
+gui-title-select-destination: "&3Select Destination"
+gui-title-station-config: "&4Station Configuration"
+gui-title-link-manager: "&3Link Manager"
+gui-title-pending-requests: "&6Pending Link Requests"
+
+# ============================================
+# GUI ITEM NAMES
+# ============================================
+
+gui-item-previous-page: "&e<< Previous Page"
+gui-item-next-page: "&eNext Page >>"
+gui-item-switch-my-stations: "&dSwitch to My Stations"
+gui-item-switch-all-stations: "&dSwitch to All Stations"
+gui-item-edit-message: "&eEdit Welcome Message"
+gui-item-link-manager: "&bLink Manager"
+gui-item-delete-station: "&cDELETE STATION"
+gui-item-back-main: "&fBack to Main List"
+gui-item-request-new-link: "&aRequest New Link"
+gui-item-view-pending: "&eView Pending Requests"
+gui-item-back-config: "&cBack to Configuration"
+gui-item-back-link-manager: "&cBack to Link Manager"
+
+# ============================================
+# GUI LORE / DESCRIPTIONS
+# ============================================
+
+gui-lore-owner: "&7Owner: &f%OWNER%"
+gui-lore-linked-stations: "&7Linked Stations: &f%COUNT%"
+gui-lore-location: "&7Location: &f%X%, %Z%"
+gui-lore-click-configure: "&5Click to open configuration (if owned)"
+gui-lore-current-message: "&7Current: &r%MESSAGE%"
+gui-lore-linked-count: "&7Linked Stations: %COUNT%"
+gui-lore-click-manage-links: "&7Click to request or manage links."
+gui-lore-delete-warning: "&4Warning: This action is permanent."
+gui-lore-link-type-public: "&a[PUBLIC]"
+gui-lore-link-type-private: "&c[PRIVATE]"
+gui-lore-from: "&7From: &e%STATION%"
+gui-lore-page: "&8Page:%PAGE%"
+gui-lore-mode: "&8Mode:%MODE%"
+gui-lore-total-stations: "&8Total Stations: %COUNT%"
+gui-lore-current-view: "&7Current View: %MODE%"
+gui-lore-next-mode: "&8NextMode:%MODE%"
+gui-lore-link-public: "&7Link Type: &aPUBLIC"
+gui-lore-link-private: "&7Link Type: &cPRIVATE"
+gui-lore-left-click-unlink: "&eLeft Click: &cUNLINK STATION"
+gui-lore-request-link-desc: "&7Request a connection to another station."
+gui-lore-pending-desc: "&7Accept or reject incoming link requests."
+gui-lore-requester: "&7Requester: &b%PLAYER%"
+gui-lore-station: "&7Station: &b%STATION%"
+gui-lore-accept-cost: "&aLeft Click: &2ACCEPT (Cost: %COST% XP)"
+gui-lore-reject: "&cRight Click: &4REJECT"
+
+# ============================================
+# HELP COMMAND
+# ============================================
+
+help-header: "&8--- SimpleTrains Help ---"
+help-set: "&e/train set <name> &7-> Creates a station (-%COST% XP)."
+help-delete: "&e/train delete <name> &7-> Deletes a station."
+help-link: "&e/train link <A> <B> [type] &7-> Sends link request (Type: public/private)."
+help-transfer: "&e/train transfer <st> <player> &7-> Transfers ownership (Owner/Admin)."
+help-near: "&e/train near &7-> Lists nearby stations."
+help-gui: "&e/train gui &7-> Opens the station list GUI."
+help-accept-reject: "&e/train accept/reject <A> <B> &7-> Accept/Reject a link request."
+help-message: "&e/train message <st> <&msg> &7-> Sets station welcome message."
+help-block: "&e/train block <mat> &7-> (Admin) Sets creation block."
